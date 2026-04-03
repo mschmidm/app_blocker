@@ -122,8 +122,10 @@ class ShieldManager: NSObject {
 
     /// Blocks all app categories via the `ManagedSettingsStore`.
     func blockAll() {
-        store.shield.applicationCategories = .all()
-        UserDefaults.standard.set(true, forKey: blockedAllKey)
+        queue.async(flags: .barrier) {
+            self.store.shield.applicationCategories = .all()
+            UserDefaults.standard.set(true, forKey: self.blockedAllKey)
+        }
     }
 
     /// Removes the shield for [identifiers] that were previously blocked.

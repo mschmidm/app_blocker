@@ -106,6 +106,20 @@ class ScheduleManager(private val context: Context) {
         const val EXTRA_SCHEDULE_ID = "schedule_id"
         const val EXTRA_APP_IDENTIFIERS = "app_identifiers"
 
+        /**
+         * Returns true if [currentMinutes] falls within the time range.
+         * Handles overnight schedules (e.g., 22:00 → 6:00) correctly.
+         */
+        internal fun isTimeInRange(currentMinutes: Int, startMinutes: Int, endMinutes: Int): Boolean {
+            return if (startMinutes <= endMinutes) {
+                // Same-day schedule (e.g., 09:00 → 17:00)
+                currentMinutes in startMinutes until endMinutes
+            } else {
+                // Overnight schedule (e.g., 22:00 → 06:00)
+                currentMinutes >= startMinutes || currentMinutes < endMinutes
+            }
+        }
+
         // Request-code bases used to generate unique alarm request codes per
         // schedule+weekday+start/end combination.
         private const val REQUEST_CODE_START_BASE = 10_000
@@ -289,7 +303,7 @@ class ScheduleManager(private val context: Context) {
         val endMinutes = schedule.endHour * 60 + schedule.endMinute
 
         return schedule.weekdays.any { weekday ->
-            isoToCalendar[weekday] == todayDow && nowMinutes in startMinutes until endMinutes
+            isoToCalendar[weekday] == todayDow && isTimeInRange(nowMinutes, startMinutes, endMinutes)
         }
     }
 

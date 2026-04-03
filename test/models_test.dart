@@ -386,6 +386,64 @@ void main() {
       expect(copy.appIdentifiers, ['com.a']);
     });
 
+    test('constructor throws ArgumentError for invalid weekday < 1', () {
+      expect(
+        () => BlockSchedule(
+          id: 's1',
+          name: 'Test',
+          appIdentifiers: ['com.a'],
+          weekdays: [0],
+          startTime: const TimeOfDay(hour: 0, minute: 0),
+          endTime: const TimeOfDay(hour: 0, minute: 0),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('constructor throws ArgumentError for invalid weekday > 7', () {
+      expect(
+        () => BlockSchedule(
+          id: 's1',
+          name: 'Test',
+          appIdentifiers: ['com.a'],
+          weekdays: [8],
+          startTime: const TimeOfDay(hour: 0, minute: 0),
+          endTime: const TimeOfDay(hour: 0, minute: 0),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('constructor throws ArgumentError for negative weekday', () {
+      expect(
+        () => BlockSchedule(
+          id: 's1',
+          name: 'Test',
+          appIdentifiers: ['com.a'],
+          weekdays: [-1],
+          startTime: const TimeOfDay(hour: 0, minute: 0),
+          endTime: const TimeOfDay(hour: 0, minute: 0),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('constructor accepts valid weekdays 1-7', () {
+      for (var day = 1; day <= 7; day++) {
+        expect(
+          () => BlockSchedule(
+            id: 's$day',
+            name: 'Test',
+            appIdentifiers: ['com.a'],
+            weekdays: [day],
+            startTime: const TimeOfDay(hour: 0, minute: 0),
+            endTime: const TimeOfDay(hour: 0, minute: 0),
+          ),
+          returnsNormally,
+        );
+      }
+    });
+
     test('toString contains id and name', () {
       final schedule = BlockSchedule(
         id: 's1',
@@ -552,6 +610,60 @@ void main() {
   // =========================================================================
 
   group('BlockScreenConfig', () {
+    test('fromMap creates instance with all fields', () {
+      final map = <String, dynamic>{
+        'title': 'Blocked',
+        'subtitle': 'Focus Time',
+        'message': 'Stay focused!',
+        'backgroundColor': 0xFF112233,
+        'iconAssetPath': 'assets/lock.png',
+      };
+
+      final config = BlockScreenConfig.fromMap(map);
+
+      expect(config.title, 'Blocked');
+      expect(config.subtitle, 'Focus Time');
+      expect(config.message, 'Stay focused!');
+      expect(config.backgroundColor, const Color(0xFF112233));
+      expect(config.iconAssetPath, 'assets/lock.png');
+    });
+
+    test('fromMap creates instance with null fields', () {
+      final map = <String, dynamic>{
+        'title': null,
+        'subtitle': null,
+        'message': null,
+        'backgroundColor': null,
+        'iconAssetPath': null,
+      };
+
+      final config = BlockScreenConfig.fromMap(map);
+
+      expect(config.title, isNull);
+      expect(config.subtitle, isNull);
+      expect(config.message, isNull);
+      expect(config.backgroundColor, isNull);
+      expect(config.iconAssetPath, isNull);
+    });
+
+    test('fromMap -> toMap roundtrip with all fields', () {
+      final original = <String, dynamic>{
+        'title': 'Test',
+        'subtitle': 'Sub',
+        'message': 'Message',
+        'backgroundColor': 0xFFAABBCC,
+        'iconAssetPath': 'icon.png',
+      };
+
+      final roundtripped = BlockScreenConfig.fromMap(original).toMap();
+
+      expect(roundtripped['title'], original['title']);
+      expect(roundtripped['subtitle'], original['subtitle']);
+      expect(roundtripped['message'], original['message']);
+      expect(roundtripped['backgroundColor'], original['backgroundColor']);
+      expect(roundtripped['iconAssetPath'], original['iconAssetPath']);
+    });
+
     test('toMap with all fields set', () {
       const config = BlockScreenConfig(
         title: 'Blocked',

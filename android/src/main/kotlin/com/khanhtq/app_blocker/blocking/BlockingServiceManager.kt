@@ -66,6 +66,7 @@ class BlockingServiceManager(private val context: Context) {
     fun stopBlocking() {
         preferences.setIsBlocking(false)
         preferences.setBlockAll(false)
+        preferences.setBlockedApps(emptySet())
         dismissBlockScreen()
 
         BlockEventStreamHandler.sendEvent(

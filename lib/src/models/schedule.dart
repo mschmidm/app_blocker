@@ -5,7 +5,7 @@ class BlockSchedule {
   /// Creates a [BlockSchedule] instance.
   ///
   /// Throws [ArgumentError] if any weekday is outside the ISO 8601 range
-  /// (1–7) or if [appIdentifiers] is empty.
+  /// (1–7).
   BlockSchedule({
     required this.id,
     required this.name,

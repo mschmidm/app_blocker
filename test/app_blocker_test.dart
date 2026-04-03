@@ -93,11 +93,16 @@ class MockAppBlockerPlatform extends AppBlockerPlatform
   // -- Block Screen Config --
 
   BlockScreenConfig? lastBlockScreenConfig;
+  BlockScreenConfig? getBlockScreenConfigResult;
 
   @override
   Future<void> setBlockScreenConfig(BlockScreenConfig config) async {
     lastBlockScreenConfig = config;
   }
+
+  @override
+  Future<BlockScreenConfig?> getBlockScreenConfig() async =>
+      getBlockScreenConfigResult;
 
   // -- Scheduling --
 
@@ -406,6 +411,30 @@ void main() {
         mockPlatform.lastBlockScreenConfig?.message,
         'This app is blocked.',
       );
+    });
+  });
+
+  group('getBlockScreenConfig', () {
+    test('returns config when set', () async {
+      const config = BlockScreenConfig(
+        title: 'Test Title',
+        subtitle: 'Test Subtitle',
+        message: 'Test Message',
+      );
+      mockPlatform.getBlockScreenConfigResult = config;
+
+      final result = await blocker.getBlockScreenConfig();
+
+      expect(result, isNotNull);
+      expect(result!.title, 'Test Title');
+      expect(result.subtitle, 'Test Subtitle');
+      expect(result.message, 'Test Message');
+    });
+
+    test('returns null when no config', () async {
+      mockPlatform.getBlockScreenConfigResult = null;
+      final result = await blocker.getBlockScreenConfig();
+      expect(result, isNull);
     });
   });
 
