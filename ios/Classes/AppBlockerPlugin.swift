@@ -131,7 +131,9 @@ public class AppBlockerPlugin: NSObject, FlutterPlugin {
             return result(invalidConfigError("Missing 'identifiers' argument."))
         }
         shield.blockApps(identifiers: identifiers)
-        eventStreamHandler?.sendEvent(type: "blocked", packageName: identifiers.first, scheduleId: nil)
+        for id in identifiers {
+            eventStreamHandler?.sendEvent(type: "blocked", packageName: id, scheduleId: nil)
+        }
         result(nil)
     }
 
@@ -153,7 +155,9 @@ public class AppBlockerPlugin: NSObject, FlutterPlugin {
             return result(invalidConfigError("Missing 'identifiers' argument."))
         }
         shield.unblockApps(identifiers: identifiers)
-        eventStreamHandler?.sendEvent(type: "unblocked", packageName: identifiers.first, scheduleId: nil)
+        for id in identifiers {
+            eventStreamHandler?.sendEvent(type: "unblocked", packageName: id, scheduleId: nil)
+        }
         result(nil)
     }
 

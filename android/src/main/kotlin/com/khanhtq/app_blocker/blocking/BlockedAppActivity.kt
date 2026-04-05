@@ -19,6 +19,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.khanhtq.app_blocker.persistence.BlockerPreferences
 import org.json.JSONObject
 
@@ -76,11 +77,12 @@ class BlockedAppActivity : Activity() {
         }
 
         val filter = IntentFilter(ACTION_DISMISS)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(dismissReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(dismissReceiver, filter)
-        }
+        ContextCompat.registerReceiver(
+            this,
+            dismissReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
     }
 
     override fun onPause() {
