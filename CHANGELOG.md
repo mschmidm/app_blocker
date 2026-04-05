@@ -1,3 +1,7 @@
+## 2.0.1
+
+- Shorten package description to meet pub.dev guidelines
+
 ## 2.0.0
 
 ### ⚠️ Breaking Changes
