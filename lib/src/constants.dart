@@ -20,7 +20,8 @@ class AppBlockerConstants {
   static const String unblockAll = 'unblockAll';
   static const String getBlockedApps = 'getBlockedApps';
   static const String getAppStatus = 'getAppStatus';
-  static const String setOverlayConfig = 'setOverlayConfig';
+  static const String setBlockScreenConfig = 'setBlockScreenConfig';
+  static const String getBlockScreenConfig = 'getBlockScreenConfig';
   static const String addSchedule = 'addSchedule';
   static const String updateSchedule = 'updateSchedule';
   static const String removeSchedule = 'removeSchedule';

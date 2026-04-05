@@ -3,10 +3,10 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'app_blocker'
-  s.version          = '1.0.0'
+  s.version          = '2.0.0'
   s.summary          = 'Cross-platform app blocking plugin for Flutter.'
   s.description      = <<-DESC
-Cross-platform app blocking plugin for Flutter. Block apps with overlay (Android)
+Cross-platform app blocking plugin for Flutter. Block apps with a custom block screen (Android)
 and Screen Time Shield (iOS). Supports scheduling, focus profiles, and events.
                        DESC
   s.homepage         = 'https://github.com/khanhtq/app_blocker'
@@ -15,7 +15,7 @@ and Screen Time Shield (iOS). Supports scheduling, focus profiles, and events.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.platform = :ios, '15.0'
+  s.platform = :ios, '16.0'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',

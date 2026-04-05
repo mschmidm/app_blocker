@@ -15,7 +15,7 @@ class MockAppBlockerPlatform extends AppBlockerPlatform
 
   BlockerCapabilities capabilitiesResult = const BlockerCapabilities(
     canBlockApps: true,
-    canShowOverlay: true,
+    canCustomizeBlockScreen: true,
     canUseSystemShield: false,
     canSchedule: true,
     canGetInstalledApps: true,
@@ -90,14 +90,19 @@ class MockAppBlockerPlatform extends AppBlockerPlatform
 
   void emitEvent(BlockEvent event) => _eventController.add(event);
 
-  // -- Overlay --
+  // -- Block Screen Config --
 
-  OverlayConfig? lastOverlayConfig;
+  BlockScreenConfig? lastBlockScreenConfig;
+  BlockScreenConfig? getBlockScreenConfigResult;
 
   @override
-  Future<void> setOverlayConfig(OverlayConfig config) async {
-    lastOverlayConfig = config;
+  Future<void> setBlockScreenConfig(BlockScreenConfig config) async {
+    lastBlockScreenConfig = config;
   }
+
+  @override
+  Future<BlockScreenConfig?> getBlockScreenConfig() async =>
+      getBlockScreenConfigResult;
 
   // -- Scheduling --
 
@@ -201,7 +206,7 @@ void main() {
       final caps = await blocker.getCapabilities();
 
       expect(caps.canBlockApps, isTrue);
-      expect(caps.canShowOverlay, isTrue);
+      expect(caps.canCustomizeBlockScreen, isTrue);
       expect(caps.canUseSystemShield, isFalse);
       expect(caps.canSchedule, isTrue);
       expect(caps.canGetInstalledApps, isTrue);
@@ -244,10 +249,7 @@ void main() {
   group('getApps', () {
     test('returns list of AppInfo', () async {
       mockPlatform.appsResult = [
-        const AppInfo(
-          packageName: 'com.example.app1',
-          appName: 'App One',
-        ),
+        const AppInfo(packageName: 'com.example.app1', appName: 'App One'),
         const AppInfo(
           packageName: 'com.example.app2',
           appName: 'App Two',
@@ -366,16 +368,20 @@ void main() {
       final events = <BlockEvent>[];
       final sub = blocker.onBlockEvent.listen(events.add);
 
-      mockPlatform.emitEvent(BlockEvent(
-        type: BlockEventType.blocked,
-        timestamp: DateTime(2026, 1, 1),
-        packageName: 'app1',
-      ));
-      mockPlatform.emitEvent(BlockEvent(
-        type: BlockEventType.unblocked,
-        timestamp: DateTime(2026, 1, 2),
-        packageName: 'app1',
-      ));
+      mockPlatform.emitEvent(
+        BlockEvent(
+          type: BlockEventType.blocked,
+          timestamp: DateTime(2026, 1, 1),
+          packageName: 'app1',
+        ),
+      );
+      mockPlatform.emitEvent(
+        BlockEvent(
+          type: BlockEventType.unblocked,
+          timestamp: DateTime(2026, 1, 2),
+          packageName: 'app1',
+        ),
+      );
 
       // Let microtasks complete.
       await Future<void>.delayed(Duration.zero);
@@ -388,33 +394,60 @@ void main() {
     });
   });
 
-  // == Overlay ==
+  // == Block Screen Config ==
 
-  group('setOverlayConfig', () {
+  group('setBlockScreenConfig', () {
     test('completes and passes config to platform', () async {
-      const config = OverlayConfig(
+      const config = BlockScreenConfig(
         title: 'Blocked',
         subtitle: 'Focus time',
         message: 'This app is blocked.',
       );
 
-      await blocker.setOverlayConfig(config);
-      expect(mockPlatform.lastOverlayConfig?.title, 'Blocked');
-      expect(mockPlatform.lastOverlayConfig?.subtitle, 'Focus time');
-      expect(mockPlatform.lastOverlayConfig?.message, 'This app is blocked.');
+      await blocker.setBlockScreenConfig(config);
+      expect(mockPlatform.lastBlockScreenConfig?.title, 'Blocked');
+      expect(mockPlatform.lastBlockScreenConfig?.subtitle, 'Focus time');
+      expect(
+        mockPlatform.lastBlockScreenConfig?.message,
+        'This app is blocked.',
+      );
+    });
+  });
+
+  group('getBlockScreenConfig', () {
+    test('returns config when set', () async {
+      const config = BlockScreenConfig(
+        title: 'Test Title',
+        subtitle: 'Test Subtitle',
+        message: 'Test Message',
+      );
+      mockPlatform.getBlockScreenConfigResult = config;
+
+      final result = await blocker.getBlockScreenConfig();
+
+      expect(result, isNotNull);
+      expect(result!.title, 'Test Title');
+      expect(result.subtitle, 'Test Subtitle');
+      expect(result.message, 'Test Message');
+    });
+
+    test('returns null when no config', () async {
+      mockPlatform.getBlockScreenConfigResult = null;
+      final result = await blocker.getBlockScreenConfig();
+      expect(result, isNull);
     });
   });
 
   // == Scheduling ==
 
   group('schedule CRUD', () {
-    const schedule = BlockSchedule(
+    final schedule = BlockSchedule(
       id: 'sched-1',
       name: 'Work Hours',
       appIdentifiers: ['com.example.app1'],
       weekdays: [1, 2, 3, 4, 5],
-      startTime: TimeOfDay(hour: 9, minute: 0),
-      endTime: TimeOfDay(hour: 17, minute: 0),
+      startTime: const TimeOfDay(hour: 9, minute: 0),
+      endTime: const TimeOfDay(hour: 17, minute: 0),
     );
 
     test('addSchedule completes', () async {

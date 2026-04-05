@@ -115,6 +115,7 @@ void main() {
         'timestamp': 1711100000000,
         'packageName': 'com.example.app',
         'scheduleId': 'sched-1',
+        'profileId': 'prof-1',
       };
 
       final event = BlockEvent.fromMap(map);
@@ -126,6 +127,7 @@ void main() {
       );
       expect(event.packageName, 'com.example.app');
       expect(event.scheduleId, 'sched-1');
+      expect(event.profileId, 'prof-1');
     });
 
     test('fromMap with null optional fields', () {
@@ -174,7 +176,7 @@ void main() {
     test('fromMap creates instance with all true', () {
       final map = <String, dynamic>{
         'canBlockApps': true,
-        'canShowOverlay': true,
+        'canCustomizeBlockScreen': true,
         'canUseSystemShield': true,
         'canSchedule': true,
         'canGetInstalledApps': true,
@@ -184,7 +186,7 @@ void main() {
       final caps = BlockerCapabilities.fromMap(map);
 
       expect(caps.canBlockApps, isTrue);
-      expect(caps.canShowOverlay, isTrue);
+      expect(caps.canCustomizeBlockScreen, isTrue);
       expect(caps.canUseSystemShield, isTrue);
       expect(caps.canSchedule, isTrue);
       expect(caps.canGetInstalledApps, isTrue);
@@ -197,7 +199,7 @@ void main() {
       final caps = BlockerCapabilities.fromMap(map);
 
       expect(caps.canBlockApps, isFalse);
-      expect(caps.canShowOverlay, isFalse);
+      expect(caps.canCustomizeBlockScreen, isFalse);
       expect(caps.canUseSystemShield, isFalse);
       expect(caps.canSchedule, isFalse);
       expect(caps.canGetInstalledApps, isFalse);
@@ -207,7 +209,7 @@ void main() {
     test('toString contains key fields', () {
       const caps = BlockerCapabilities(
         canBlockApps: true,
-        canShowOverlay: false,
+        canCustomizeBlockScreen: false,
         canUseSystemShield: true,
         canSchedule: false,
         canGetInstalledApps: true,
@@ -215,7 +217,7 @@ void main() {
       );
       final str = caps.toString();
       expect(str, contains('canBlockApps: true'));
-      expect(str, contains('canShowOverlay: false'));
+      expect(str, contains('canCustomizeBlockScreen: false'));
     });
   });
 
@@ -265,13 +267,13 @@ void main() {
     });
 
     test('toMap produces correct keys', () {
-      const schedule = BlockSchedule(
+      final schedule = BlockSchedule(
         id: 's1',
         name: 'Test',
         appIdentifiers: ['com.a'],
         weekdays: [6, 7],
-        startTime: TimeOfDay(hour: 22, minute: 15),
-        endTime: TimeOfDay(hour: 6, minute: 45),
+        startTime: const TimeOfDay(hour: 22, minute: 15),
+        endTime: const TimeOfDay(hour: 6, minute: 45),
         enabled: false,
       );
 
@@ -315,29 +317,29 @@ void main() {
     });
 
     test('equality is based on id', () {
-      const a = BlockSchedule(
+      final a = BlockSchedule(
         id: 's1',
         name: 'A',
         appIdentifiers: [],
         weekdays: [],
-        startTime: TimeOfDay(hour: 0, minute: 0),
-        endTime: TimeOfDay(hour: 0, minute: 0),
+        startTime: const TimeOfDay(hour: 0, minute: 0),
+        endTime: const TimeOfDay(hour: 0, minute: 0),
       );
-      const b = BlockSchedule(
+      final b = BlockSchedule(
         id: 's1',
         name: 'B',
         appIdentifiers: ['com.x'],
         weekdays: [1],
-        startTime: TimeOfDay(hour: 1, minute: 0),
-        endTime: TimeOfDay(hour: 2, minute: 0),
+        startTime: const TimeOfDay(hour: 1, minute: 0),
+        endTime: const TimeOfDay(hour: 2, minute: 0),
       );
-      const c = BlockSchedule(
+      final c = BlockSchedule(
         id: 's2',
         name: 'A',
         appIdentifiers: [],
         weekdays: [],
-        startTime: TimeOfDay(hour: 0, minute: 0),
-        endTime: TimeOfDay(hour: 0, minute: 0),
+        startTime: const TimeOfDay(hour: 0, minute: 0),
+        endTime: const TimeOfDay(hour: 0, minute: 0),
       );
 
       expect(a, equals(b));
@@ -345,34 +347,34 @@ void main() {
     });
 
     test('hashCode is based on id', () {
-      const a = BlockSchedule(
+      final a = BlockSchedule(
         id: 's1',
         name: 'A',
         appIdentifiers: [],
         weekdays: [],
-        startTime: TimeOfDay(hour: 0, minute: 0),
-        endTime: TimeOfDay(hour: 0, minute: 0),
+        startTime: const TimeOfDay(hour: 0, minute: 0),
+        endTime: const TimeOfDay(hour: 0, minute: 0),
       );
-      const b = BlockSchedule(
+      final b = BlockSchedule(
         id: 's1',
         name: 'B',
         appIdentifiers: [],
         weekdays: [],
-        startTime: TimeOfDay(hour: 0, minute: 0),
-        endTime: TimeOfDay(hour: 0, minute: 0),
+        startTime: const TimeOfDay(hour: 0, minute: 0),
+        endTime: const TimeOfDay(hour: 0, minute: 0),
       );
 
       expect(a.hashCode, equals(b.hashCode));
     });
 
     test('copyWith replaces fields correctly', () {
-      const original = BlockSchedule(
+      final original = BlockSchedule(
         id: 's1',
         name: 'Original',
         appIdentifiers: ['com.a'],
         weekdays: [1],
-        startTime: TimeOfDay(hour: 8, minute: 0),
-        endTime: TimeOfDay(hour: 17, minute: 0),
+        startTime: const TimeOfDay(hour: 8, minute: 0),
+        endTime: const TimeOfDay(hour: 17, minute: 0),
         enabled: true,
       );
 
@@ -384,14 +386,72 @@ void main() {
       expect(copy.appIdentifiers, ['com.a']);
     });
 
+    test('constructor throws ArgumentError for invalid weekday < 1', () {
+      expect(
+        () => BlockSchedule(
+          id: 's1',
+          name: 'Test',
+          appIdentifiers: ['com.a'],
+          weekdays: [0],
+          startTime: const TimeOfDay(hour: 0, minute: 0),
+          endTime: const TimeOfDay(hour: 0, minute: 0),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('constructor throws ArgumentError for invalid weekday > 7', () {
+      expect(
+        () => BlockSchedule(
+          id: 's1',
+          name: 'Test',
+          appIdentifiers: ['com.a'],
+          weekdays: [8],
+          startTime: const TimeOfDay(hour: 0, minute: 0),
+          endTime: const TimeOfDay(hour: 0, minute: 0),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('constructor throws ArgumentError for negative weekday', () {
+      expect(
+        () => BlockSchedule(
+          id: 's1',
+          name: 'Test',
+          appIdentifiers: ['com.a'],
+          weekdays: [-1],
+          startTime: const TimeOfDay(hour: 0, minute: 0),
+          endTime: const TimeOfDay(hour: 0, minute: 0),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('constructor accepts valid weekdays 1-7', () {
+      for (var day = 1; day <= 7; day++) {
+        expect(
+          () => BlockSchedule(
+            id: 's$day',
+            name: 'Test',
+            appIdentifiers: ['com.a'],
+            weekdays: [day],
+            startTime: const TimeOfDay(hour: 0, minute: 0),
+            endTime: const TimeOfDay(hour: 0, minute: 0),
+          ),
+          returnsNormally,
+        );
+      }
+    });
+
     test('toString contains id and name', () {
-      const schedule = BlockSchedule(
+      final schedule = BlockSchedule(
         id: 's1',
         name: 'Work',
         appIdentifiers: [],
         weekdays: [],
-        startTime: TimeOfDay(hour: 0, minute: 0),
-        endTime: TimeOfDay(hour: 0, minute: 0),
+        startTime: const TimeOfDay(hour: 0, minute: 0),
+        endTime: const TimeOfDay(hour: 0, minute: 0),
       );
       final str = schedule.toString();
       expect(str, contains('s1'));
@@ -461,7 +521,7 @@ void main() {
     });
 
     test('toMap produces correct structure', () {
-      const profile = BlockProfile(
+      final profile = BlockProfile(
         id: 'p1',
         name: 'Test',
         appIdentifiers: ['com.a'],
@@ -471,8 +531,8 @@ void main() {
             name: 'Inner',
             appIdentifiers: ['com.a'],
             weekdays: [1],
-            startTime: TimeOfDay(hour: 9, minute: 0),
-            endTime: TimeOfDay(hour: 17, minute: 0),
+            startTime: const TimeOfDay(hour: 9, minute: 0),
+            endTime: const TimeOfDay(hour: 17, minute: 0),
           ),
         ],
         isActive: true,
@@ -538,11 +598,7 @@ void main() {
     });
 
     test('toString contains id and name', () {
-      const profile = BlockProfile(
-        id: 'p1',
-        name: 'Work',
-        appIdentifiers: [],
-      );
+      const profile = BlockProfile(id: 'p1', name: 'Work', appIdentifiers: []);
       final str = profile.toString();
       expect(str, contains('p1'));
       expect(str, contains('Work'));
@@ -550,12 +606,66 @@ void main() {
   });
 
   // =========================================================================
-  // OverlayConfig
+  // BlockScreenConfig
   // =========================================================================
 
-  group('OverlayConfig', () {
+  group('BlockScreenConfig', () {
+    test('fromMap creates instance with all fields', () {
+      final map = <String, dynamic>{
+        'title': 'Blocked',
+        'subtitle': 'Focus Time',
+        'message': 'Stay focused!',
+        'backgroundColor': 0xFF112233,
+        'iconAssetPath': 'assets/lock.png',
+      };
+
+      final config = BlockScreenConfig.fromMap(map);
+
+      expect(config.title, 'Blocked');
+      expect(config.subtitle, 'Focus Time');
+      expect(config.message, 'Stay focused!');
+      expect(config.backgroundColor, const Color(0xFF112233));
+      expect(config.iconAssetPath, 'assets/lock.png');
+    });
+
+    test('fromMap creates instance with null fields', () {
+      final map = <String, dynamic>{
+        'title': null,
+        'subtitle': null,
+        'message': null,
+        'backgroundColor': null,
+        'iconAssetPath': null,
+      };
+
+      final config = BlockScreenConfig.fromMap(map);
+
+      expect(config.title, isNull);
+      expect(config.subtitle, isNull);
+      expect(config.message, isNull);
+      expect(config.backgroundColor, isNull);
+      expect(config.iconAssetPath, isNull);
+    });
+
+    test('fromMap -> toMap roundtrip with all fields', () {
+      final original = <String, dynamic>{
+        'title': 'Test',
+        'subtitle': 'Sub',
+        'message': 'Message',
+        'backgroundColor': 0xFFAABBCC,
+        'iconAssetPath': 'icon.png',
+      };
+
+      final roundtripped = BlockScreenConfig.fromMap(original).toMap();
+
+      expect(roundtripped['title'], original['title']);
+      expect(roundtripped['subtitle'], original['subtitle']);
+      expect(roundtripped['message'], original['message']);
+      expect(roundtripped['backgroundColor'], original['backgroundColor']);
+      expect(roundtripped['iconAssetPath'], original['iconAssetPath']);
+    });
+
     test('toMap with all fields set', () {
-      const config = OverlayConfig(
+      const config = BlockScreenConfig(
         title: 'Blocked',
         subtitle: 'Focus Time',
         message: 'Stay focused!',
@@ -573,7 +683,7 @@ void main() {
     });
 
     test('toMap with null fields', () {
-      const config = OverlayConfig();
+      const config = BlockScreenConfig();
       final map = config.toMap();
 
       expect(map['title'], isNull);
@@ -584,7 +694,7 @@ void main() {
     });
 
     test('toString contains title and subtitle', () {
-      const config = OverlayConfig(title: 'T', subtitle: 'S');
+      const config = BlockScreenConfig(title: 'T', subtitle: 'S');
       final str = config.toString();
       expect(str, contains('T'));
       expect(str, contains('S'));
@@ -630,17 +740,19 @@ void main() {
 
   group('BlockEventType enum', () {
     test('has expected values', () {
-      expect(BlockEventType.values, hasLength(5));
+      expect(BlockEventType.values, hasLength(7));
       expect(BlockEventType.values, contains(BlockEventType.blocked));
       expect(BlockEventType.values, contains(BlockEventType.unblocked));
       expect(BlockEventType.values, contains(BlockEventType.attemptedAccess));
-      expect(
-        BlockEventType.values,
-        contains(BlockEventType.scheduleActivated),
-      );
+      expect(BlockEventType.values, contains(BlockEventType.scheduleActivated));
       expect(
         BlockEventType.values,
         contains(BlockEventType.scheduleDeactivated),
+      );
+      expect(BlockEventType.values, contains(BlockEventType.profileActivated));
+      expect(
+        BlockEventType.values,
+        contains(BlockEventType.profileDeactivated),
       );
     });
 

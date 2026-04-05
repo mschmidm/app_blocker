@@ -3,7 +3,7 @@ import 'models/app_info.dart';
 import 'models/block_event.dart';
 import 'models/block_status.dart';
 import 'models/blocker_capabilities.dart';
-import 'models/overlay_config.dart';
+import 'models/block_screen_config.dart';
 import 'models/permission_status.dart';
 import 'models/profile.dart';
 import 'models/schedule.dart';
@@ -12,7 +12,7 @@ import 'models/schedule.dart';
 ///
 /// Provides a unified API to block applications on both Android and iOS.
 ///
-/// On Android, uses a foreground service with overlay to block apps.
+/// On Android, uses an AccessibilityService with a customizable block screen Activity to block apps.
 /// On iOS, uses the Screen Time API (FamilyControls + ManagedSettings).
 ///
 /// ```dart
@@ -55,7 +55,7 @@ class AppBlocker {
 
   /// Checks whether the required permissions are granted.
   ///
-  /// On Android, checks overlay, usage stats, and query packages permissions.
+  /// On Android, checks Accessibility Service and query packages permissions.
   /// On iOS, checks FamilyControls authorization status.
   Future<BlockerPermissionStatus> checkPermission() {
     return _platform.checkPermission();
@@ -85,8 +85,8 @@ class AppBlocker {
 
   /// Blocks the specified apps by their identifiers.
   ///
-  /// On Android, starts a foreground service that shows an overlay when
-  /// any of the specified apps are brought to the foreground.
+  /// On Android, uses the AccessibilityService to detect foreground apps and
+  /// shows a full-screen block screen Activity for any of the specified apps.
   ///
   /// On iOS, applies shield restrictions via the Screen Time API.
   ///
@@ -108,7 +108,10 @@ class AppBlocker {
     return _platform.unblockApps(appIdentifiers);
   }
 
-  /// Unblocks all apps and stops the blocking service.
+  /// Stops all blocking.
+  ///
+  /// Deactivates the active profile (if any), disables all schedules, and
+  /// stops any direct blocking started via [blockApps] or [blockAll].
   Future<void> unblockAll() {
     return _platform.unblockAll();
   }
@@ -130,15 +133,22 @@ class AppBlocker {
   /// Emits events when apps are blocked, unblocked, or attempted to access.
   Stream<BlockEvent> get onBlockEvent => _platform.onBlockEvent;
 
-  // === Overlay (Android only) ===
+  // === Block Screen Config (Android only) ===
 
-  /// Configures the overlay shown when a blocked app is opened.
+  /// Configures the block screen shown when a blocked app is opened.
   ///
   /// This only has effect on Android. On iOS, the system shield is used.
   ///
   /// Throws [PlatformUnsupportedException] on iOS.
-  Future<void> setOverlayConfig(OverlayConfig config) {
-    return _platform.setOverlayConfig(config);
+  Future<void> setBlockScreenConfig(BlockScreenConfig config) {
+    return _platform.setBlockScreenConfig(config);
+  }
+
+  /// Returns the current block screen configuration, or `null` if none has been saved.
+  ///
+  /// This only has effect on Android.
+  Future<BlockScreenConfig?> getBlockScreenConfig() {
+    return _platform.getBlockScreenConfig();
   }
 
   // === Scheduling ===
