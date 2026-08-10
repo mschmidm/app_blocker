@@ -21,8 +21,10 @@ Add `app_blocker` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  app_blocker: ^2.0.0
+  app_blocker: ^2.2.0
 ```
+
+**Requires Flutter 3.44 / Dart 3.12 or newer.** On earlier Flutter versions, use `app_blocker: ^2.1.0`.
 
 ### Android Setup
 

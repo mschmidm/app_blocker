@@ -1,3 +1,12 @@
+## 2.2.0
+
+- **Migrates to Built-in Kotlin.** The Android build no longer applies the Kotlin Gradle Plugin itself, which is required for Android Gradle Plugin 9 and removes the "plugins that apply KGP" warning on Flutter 3.44+.
+- **Updates the minimum supported SDK version to Flutter 3.44 / Dart 3.12.** Earlier Flutter versions cannot supply the Kotlin toolchain this plugin now relies on, so apps on older Flutter must stay on 2.1.x.
+- Updates Android dependencies: `core-ktx` 1.18.0, `work-runtime-ktx` 2.11.2, `kotlinx-coroutines-android` 1.10.2, `gson` 2.14.0.
+- Removes the obsolete `package` attribute from the Android manifest, which AGP 8 replaced with the `namespace` build setting.
+- Fixes the iOS podspec version, which was still pinned at 2.0.0.
+- Example app: updates to AGP 9.0.1 / Kotlin 2.3.20 / Gradle 9.1.0 and aligns its iOS deployment target with the plugin's 16.0 minimum.
+
 ## 2.1.0
 
 - **One-time schedules:** Added optional `scheduleDate` parameter to `BlockSchedule` for non-recurring schedules. Automatically disables after completion. Fully backward compatible with existing recurring schedules.
