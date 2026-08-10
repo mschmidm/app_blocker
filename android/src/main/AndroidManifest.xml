@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.khanhtq.app_blocker">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Enumerate installed apps to populate the app list. -->
     <uses-permission

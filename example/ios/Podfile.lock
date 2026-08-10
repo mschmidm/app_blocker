@@ -1,28 +1,22 @@
 PODS:
-  - app_blocker (1.0.6):
+  - app_blocker (2.2.0):
     - Flutter
   - Flutter (1.0.0)
-  - integration_test (0.0.1):
-    - Flutter
 
 DEPENDENCIES:
   - app_blocker (from `.symlinks/plugins/app_blocker/ios`)
   - Flutter (from `Flutter`)
-  - integration_test (from `.symlinks/plugins/integration_test/ios`)
 
 EXTERNAL SOURCES:
   app_blocker:
     :path: ".symlinks/plugins/app_blocker/ios"
   Flutter:
     :path: Flutter
-  integration_test:
-    :path: ".symlinks/plugins/integration_test/ios"
 
 SPEC CHECKSUMS:
-  app_blocker: 6922a5e6117a015a37e0bbc996cdc3b12c303a4d
+  app_blocker: d54db32a310cbb0645af7967a5e97f0b829ac35b
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
 
-PODFILE CHECKSUM: 53a6aebc29ccee84c41f92f409fc20cd4ca011f1
+PODFILE CHECKSUM: 1857a7cdb7dfafe45f2b0e9a9af44644190f7506
 
 COCOAPODS: 1.16.2

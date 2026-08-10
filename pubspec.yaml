@@ -1,9 +1,9 @@
 name: app_blocker
 description: "Cross-platform app blocking plugin for Flutter. Block apps with custom block screen (Android) and Screen Time Shield (iOS). Supports scheduling and profiles."
-version: 2.1.0
-homepage: https://github.com/tranquockhanh0506/app_blocker
-repository: https://github.com/tranquockhanh0506/app_blocker
-issue_tracker: https://github.com/tranquockhanh0506/app_blocker/issues
+version: 2.2.0
+homepage: https://github.com/kaneiof/app_blocker
+repository: https://github.com/kaneiof/app_blocker
+issue_tracker: https://github.com/kaneiof/app_blocker/issues
 
 topics:
   - app-blocking
@@ -13,8 +13,8 @@ topics:
   - focus
 
 environment:
-  sdk: ^3.10.1
-  flutter: '>=3.3.0'
+  sdk: ^3.12.0
+  flutter: '>=3.44.0'
 
 dependencies:
   flutter:
