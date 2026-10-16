@@ -227,4 +227,13 @@ class AppBlocker {
   Future<BlockProfile?> getActiveProfile() {
     return _platform.getActiveProfile();
   }
+
+  /// Fetches and clears the Android native debug event buffer.
+  ///
+  /// Returns a list of raw event maps buffered while the Flutter engine was not
+  /// listening (e.g. background alarms, service lifecycle, device boot).
+  /// Returns an empty list on iOS.
+  Future<List<Map<String, dynamic>>> getDebugLog() {
+    return _platform.getDebugLog();
+  }
 }

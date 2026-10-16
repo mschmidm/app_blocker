@@ -2,7 +2,10 @@ package com.khanhtq.app_blocker
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
+import com.khanhtq.app_blocker.blocking.AppBlockerAccessibilityService
 import com.khanhtq.app_blocker.blocking.BlockingServiceManager
+import com.khanhtq.app_blocker.debug.DebugEventBuffer
 import com.khanhtq.app_blocker.event.BlockEventStreamHandler
 import com.khanhtq.app_blocker.persistence.BlockerPreferences
 import com.khanhtq.app_blocker.scheduling.ProfileManager
@@ -61,6 +64,7 @@ class AppBlockerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         private const val ACTIVATE_PROFILE = "activateProfile"
         private const val DEACTIVATE_PROFILE = "deactivateProfile"
         private const val GET_ACTIVE_PROFILE = "getActiveProfile"
+        private const val GET_DEBUG_LOG = "getDebugLog"
 
         // Error codes — must match Dart AppBlockerConstants exactly.
         const val ERROR_PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -105,6 +109,16 @@ class AppBlockerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         blockingServiceManager = BlockingServiceManager(context)
         scheduleManager = ScheduleManager(context)
         profileManager = ProfileManager(context)
+
+        val serviceAlive = AppBlockerAccessibilityService.instance != null
+        val isBlocking = preferences.isBlocking()
+        Log.i("AppBlockerPlugin", "onAttachedToEngine: serviceAlive=$serviceAlive isBlocking=$isBlocking")
+        DebugEventBuffer.append(context, "pluginAttached", mapOf(
+            "serviceAlive" to serviceAlive,
+            "isBlocking" to isBlocking,
+            "blockedAppsCount" to preferences.getBlockedApps().size,
+        ))
+
         scheduleManager.rescheduleAll()
     }
 
@@ -389,6 +403,29 @@ class AppBlockerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             GET_ACTIVE_PROFILE -> result.success(profileManager.getActiveProfile())
+
+            GET_DEBUG_LOG -> {
+                val serviceAlive = AppBlockerAccessibilityService.instance != null
+                val isBlocking = preferences.isBlocking()
+                // Append a snapshot entry so the caller sees current state
+                DebugEventBuffer.append(context, "debugLogFetched", mapOf(
+                    "serviceAlive" to serviceAlive,
+                    "isBlocking" to isBlocking,
+                    "blockedAppsCount" to preferences.getBlockedApps().size,
+                    "blockedApps" to preferences.getBlockedApps().toList(),
+                ))
+                val events = DebugEventBuffer.getAndClear(context)
+                // Convert to List<Map<String, Any?>> — the Flutter channel serializes this automatically
+                result.success(events.map { event ->
+                    // Ensure all values are serializable over the method channel
+                    event.mapValues { (_, v) ->
+                        when (v) {
+                            is List<*> -> ArrayList(v)
+                            else -> v
+                        }
+                    }
+                })
+            }
 
             else -> result.notImplemented()
         }

@@ -3,7 +3,9 @@ package com.khanhtq.app_blocker.scheduling
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.khanhtq.app_blocker.blocking.BlockingServiceManager
+import com.khanhtq.app_blocker.debug.DebugEventBuffer
 import com.khanhtq.app_blocker.event.BlockEventStreamHandler
 
 class ScheduleAlarmReceiver : BroadcastReceiver() {
@@ -21,6 +23,11 @@ class ScheduleAlarmReceiver : BroadcastReceiver() {
 
         when (action) {
             ScheduleManager.ACTION_SCHEDULE_START -> {
+                Log.i("ScheduleAlarmReceiver", "ALARM START scheduleId=$scheduleId apps=${appIdentifiers.size}")
+                DebugEventBuffer.append(context, "alarmFiredStart", mapOf(
+                    "scheduleId" to scheduleId,
+                    "appIdentifiers" to appIdentifiers,
+                ))
                 blockingServiceManager.startBlocking(appIdentifiers)
                 BlockEventStreamHandler.sendEvent(
                     mapOf(
@@ -33,6 +40,11 @@ class ScheduleAlarmReceiver : BroadcastReceiver() {
             }
 
             ScheduleManager.ACTION_SCHEDULE_END -> {
+                Log.i("ScheduleAlarmReceiver", "ALARM END scheduleId=$scheduleId")
+                DebugEventBuffer.append(context, "alarmFiredEnd", mapOf(
+                    "scheduleId" to scheduleId,
+                    "appIdentifiers" to appIdentifiers,
+                ))
                 blockingServiceManager.stopBlockingApps(appIdentifiers.toList())
                 BlockEventStreamHandler.sendEvent(
                     mapOf(
@@ -41,7 +53,7 @@ class ScheduleAlarmReceiver : BroadcastReceiver() {
                         "timestamp" to timestamp,
                     )
                 )
-                
+
                 if (scheduleManager.findSchedule(scheduleId)?.scheduleDate != null) {
                     scheduleManager.removeSchedule(scheduleId)
                 }

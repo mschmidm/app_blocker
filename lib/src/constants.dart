@@ -85,6 +85,9 @@ class AppBlockerConstants {
   /// Method name for getting the active profile.
   static const String getActiveProfile = 'getActiveProfile';
 
+  /// Method name for fetching and clearing the Android debug event buffer.
+  static const String getDebugLog = 'getDebugLog';
+
   // -- Error codes --
 
   /// Error code when user denies required permission.

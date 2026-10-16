@@ -2,6 +2,8 @@ package com.khanhtq.app_blocker.blocking
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import com.khanhtq.app_blocker.debug.DebugEventBuffer
 import com.khanhtq.app_blocker.event.BlockEventStreamHandler
 import com.khanhtq.app_blocker.persistence.BlockerPreferences
 
@@ -35,7 +37,25 @@ class BlockingServiceManager(private val context: Context) {
         preferences.setIsBlocking(true)
         preferences.setBlockAll(false)
 
+        val serviceAlive = AppBlockerAccessibilityService.instance != null
+        Log.i("BlockingServiceManager", "startBlocking: packages=$packages serviceAlive=$serviceAlive")
+
         val timestamp = System.currentTimeMillis()
+        DebugEventBuffer.append(context, "blockingStarted", mapOf(
+            "packages" to packages,
+            "packageCount" to packages.size,
+            "serviceAlive" to serviceAlive,
+            "totalBlockedCount" to (existing + packages.toSet()).size,
+        ))
+        BlockEventStreamHandler.sendEvent(
+            mapOf(
+                "type" to "blockingStarted",
+                "packages" to packages,
+                "serviceAlive" to serviceAlive,
+                "timestamp" to timestamp,
+            )
+        )
+
         for (packageName in packages) {
             BlockEventStreamHandler.sendEvent(
                 mapOf(
@@ -54,8 +74,18 @@ class BlockingServiceManager(private val context: Context) {
      * block every non-system app that comes to the foreground.
      */
     fun startBlockingAll() {
+        val serviceAlive = AppBlockerAccessibilityService.instance != null
+        Log.i("BlockingServiceManager", "startBlockingAll: serviceAlive=$serviceAlive")
         preferences.setIsBlocking(true)
         preferences.setBlockAll(true)
+        DebugEventBuffer.append(context, "blockingStarted", mapOf(
+            "packages" to listOf("__ALL__"),
+            "serviceAlive" to serviceAlive,
+            "blockAll" to true,
+        ))
+        BlockEventStreamHandler.sendEvent(
+            mapOf("type" to "blockingStarted", "blockAll" to true, "serviceAlive" to serviceAlive, "timestamp" to System.currentTimeMillis())
+        )
         AppBlockerAccessibilityService.instance?.checkCurrentForegroundApp()
     }
 
@@ -64,17 +94,16 @@ class BlockingServiceManager(private val context: Context) {
      * Emits a single `"unblocked"` event and dismisses the block screen if visible.
      */
     fun stopBlocking() {
+        Log.i("BlockingServiceManager", "stopBlocking: all")
         preferences.setIsBlocking(false)
         preferences.setBlockAll(false)
         preferences.setBlockedApps(emptySet())
         dismissBlockScreen()
 
-        BlockEventStreamHandler.sendEvent(
-            mapOf(
-                "type" to "unblocked",
-                "timestamp" to System.currentTimeMillis(),
-            )
-        )
+        val ts = System.currentTimeMillis()
+        DebugEventBuffer.append(context, "blockingStopped", mapOf("stopAll" to true))
+        BlockEventStreamHandler.sendEvent(mapOf("type" to "blockingStopped", "stopAll" to true, "timestamp" to ts))
+        BlockEventStreamHandler.sendEvent(mapOf("type" to "unblocked", "timestamp" to ts))
     }
 
     /**
@@ -85,6 +114,16 @@ class BlockingServiceManager(private val context: Context) {
         val remaining = preferences.getBlockedApps().toMutableSet()
         remaining.removeAll(packages.toSet())
         preferences.setBlockedApps(remaining)
+
+        Log.i("BlockingServiceManager", "stopBlockingApps: removed=$packages remaining=${remaining.size}")
+        DebugEventBuffer.append(context, "blockingStopped", mapOf(
+            "packages" to packages,
+            "remainingCount" to remaining.size,
+            "blockingNowOff" to remaining.isEmpty(),
+        ))
+        BlockEventStreamHandler.sendEvent(
+            mapOf("type" to "blockingStopped", "packages" to packages, "remainingCount" to remaining.size, "timestamp" to System.currentTimeMillis())
+        )
 
         if (remaining.isEmpty()) {
             preferences.setIsBlocking(false)

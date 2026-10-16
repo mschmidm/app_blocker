@@ -181,4 +181,12 @@ abstract class AppBlockerPlatform extends PlatformInterface {
   Future<BlockProfile?> getActiveProfile() {
     throw UnimplementedError('getActiveProfile() has not been implemented.');
   }
+
+  /// Fetches and clears the Android native debug event buffer.
+  ///
+  /// Returns a list of raw event maps (each has "type" string and "timestamp" int ms).
+  /// Returns an empty list on iOS.
+  Future<List<Map<String, dynamic>>> getDebugLog() {
+    return Future.value([]);
+  }
 }

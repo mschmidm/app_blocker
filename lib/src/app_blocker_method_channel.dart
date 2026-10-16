@@ -241,6 +241,21 @@ class MethodChannelAppBlocker extends AppBlockerPlatform {
     return BlockProfile.fromMap(Map<String, dynamic>.from(result));
   }
 
+  @override
+  Future<List<Map<String, dynamic>>> getDebugLog() async {
+    try {
+      final result = await _methodChannel.invokeMethod<List>(
+        AppBlockerConstants.getDebugLog,
+      );
+      if (result == null) return [];
+      return result
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   // -- Helpers --
 
   /// Invokes a method on the platform channel with proper error translation.

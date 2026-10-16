@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import com.khanhtq.app_blocker.debug.DebugEventBuffer
 import com.khanhtq.app_blocker.event.BlockEventStreamHandler
 import com.khanhtq.app_blocker.persistence.BlockerPreferences
 
@@ -80,13 +81,39 @@ class AppBlockerAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         preferences = BlockerPreferences(this)
         instance = this
+        Log.i(TAG, "onServiceConnected")
+        val isBlocking = preferences.isBlocking()
+        val blockedApps = preferences.getBlockedApps()
+        val details = mapOf(
+            "isBlocking" to isBlocking,
+            "blockedApps" to blockedApps.toList(),
+            "blockedAppsCount" to blockedApps.size,
+        )
+        DebugEventBuffer.append(this, "serviceConnected", details)
+        BlockEventStreamHandler.sendEvent(
+            mapOf("type" to "serviceConnected", "timestamp" to System.currentTimeMillis()) + details
+        )
     }
 
     override fun onInterrupt() {
-        // Required override; nothing to clean up since the Activity manages itself.
+        Log.w(TAG, "onInterrupt")
+        DebugEventBuffer.append(this, "serviceInterrupted")
+        BlockEventStreamHandler.sendEvent(
+            mapOf("type" to "serviceInterrupted", "timestamp" to System.currentTimeMillis())
+        )
     }
 
     override fun onDestroy() {
+        Log.w(TAG, "onDestroy — service is being killed")
+        // preferences is only initialized in onServiceConnected
+        val details = if (::preferences.isInitialized) mapOf(
+            "wasBlocking" to preferences.isBlocking(),
+            "blockedAppsCount" to preferences.getBlockedApps().size,
+        ) else emptyMap()
+        DebugEventBuffer.append(this, "serviceDisconnected", details)
+        BlockEventStreamHandler.sendEvent(
+            mapOf("type" to "serviceDisconnected", "timestamp" to System.currentTimeMillis())
+        )
         instance = null
         handler.removeCallbacksAndMessages(null)
         super.onDestroy()
